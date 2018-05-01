@@ -4,12 +4,10 @@
 #include <linux/sched.h>
 #include <linux/syscalls.h>
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Adam Taguirov <ataguiro@student.42.fr>");
-MODULE_DESCRIPTION("Hello World module");
+asmlinkage long sys_listProcessInfo(void);
 
-static int __init hello_init(void) {
-	printk(KERN_INFO "Hello World !\n");
+asmlinkage long sys_listProcessInfo(void) {
+
 	struct task_struct *proces;
 
 	for_each_process(proces) {
@@ -34,7 +32,8 @@ static int __init hello_init(void) {
 
 		if(proces->parent)
 			printk(
-					"Parent process: %s, PID_Number: %ld", \
+					"Parent process: %s, \
+					PID_Number: %ld", \
 					proces->parent->comm, \
 					(long)task_pid_nr(proces->parent) \
 			      );
@@ -42,13 +41,4 @@ static int __init hello_init(void) {
 		printk("\n\n");
 
 	}
-
-	return 0;
 }
-
-static void __exit hello_cleanup(void) {
-	printk(KERN_INFO "Cleaning up module.\n");
-}
-
-module_init(hello_init);
-module_exit(hello_cleanup);
