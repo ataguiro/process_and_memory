@@ -12,20 +12,35 @@ MODULE_DESCRIPTION("Hello World module");
 static int __init hello_init(void) {
 	printk(KERN_INFO "Hello World !\n");
 	struct task_struct *cur;
+	struct task_struct *child;
+	struct path root;
+	struct path pwd;
+	struct pid *pid;
 	char buffer[PATH_MAX];
+	char ptr[TASK_COMM_LEN];
+	pid_t npid;
 
-	for_each_process(cur) {
-		printk("name  : %s\n", cur->comm);
-		printk("pid   : %d\n", cur->pid);
-		printk("state : %ld\n", cur->state);
-		printk("stack : %p\n", cur->stack);
-		printk("age   : %llu\n", cur->start_time);
-		printk("child : none\n");
-		printk("ppid  : %d\n", cur->parent->pid);
-		printk("root  : %s\n", dentry_path_raw(cur->fs->root.dentry, buffer, PATH_MAX));
-		printk("pwd   : %s\n", dentry_path_raw(cur->fs->pwd.dentry, buffer, PATH_MAX));
-		printk("\n");
+	pid = find_get_pid(1);
+	cur = pid_task(pid, PIDTYPE_PID);
+	npid = task_pid_nr(cur);
+	get_fs_root(cur->fs, &root);
+	get_fs_pwd(cur->fs, &pwd);
+	get_task_comm(ptr, cur);
+	
+	printk("name  : %s\n", ptr);
+	printk("pid   : %d\n", npid);
+	printk("state : %ld\n", cur->state);
+	printk("stack : %p\n", cur->stack);
+	printk("age   : %llu\n", cur->start_time);
+	list_for_each_entry(child, &cur->children, sibling) {
+		printk("%d\n", child->pid);
 	}
+	printk("ppid  : %d\n", cur->parent->pid);
+	spin_lock(&cur->fs->lock);
+	printk("root  : %s\n", dentry_path_raw(root.dentry, buffer, PATH_MAX));
+	printk("pwd   : %s\n", dentry_path_raw(pwd.dentry, buffer, PATH_MAX));
+	spin_unlock(&cur->fs->lock);
+	printk("\n");
 
 	return 0;
 }

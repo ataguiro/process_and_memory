@@ -1,0 +1,1 @@
+cmd_/root/process_and_memory/info/main.ko := ld -r -m elf_x86_64 -z max-page-size=0x200000 -T ./scripts/module-common.lds --build-id  -o /root/process_and_memory/info/main.ko /root/process_and_memory/info/main.o /root/process_and_memory/info/main.mod.o ;  true
