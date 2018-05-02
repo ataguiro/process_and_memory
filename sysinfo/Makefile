@@ -1,1 +1,1 @@
-obj-y:=listProcessInfo.o
+obj-y:=get_pid_info.o

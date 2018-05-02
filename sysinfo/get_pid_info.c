@@ -1,27 +1,17 @@
-#include <linux/module.h>
-#include <linux/kernel.h>
-#include <linux/init.h>
-#include <linux/sched.h>
-#include <linux/syscalls.h>
-#include <linux/fs_struct.h>
+#include<linux/kernel.h>
+#include<linux/init.h>
+#include<linux/sched.h>
+#include<linux/syscalls.h>
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Adam Taguirov <ataguiro@student.42.fr>");
-MODULE_DESCRIPTION("Hello World module");
-
-static int __init hello_init(void) {
-	printk(KERN_INFO "Hello World !\n");
-	struct task_struct *cur;
-	struct task_struct *child;
-	struct path root;
-	struct path pwd;
-	struct pid *pid;
-	char buffer[PATH_MAX];
-	char ptr[TASK_COMM_LEN];
+asmlinkage long sys_get_pid_info(struct pid_info *ret, int pid) {
+	struct task_struct *cur, child;
+	struct path root, pwd;
+	struct pid *spid;
+	char buffer[PATH_MAX], ptr[TASK_COMM_LEN];
 	pid_t npid;
 
-	pid = find_get_pid(1);
-	cur = pid_task(pid, PIDTYPE_PID);
+	spid = find_get_pid(pid);
+	cur = pid_task(spid, PIDTYPE_PID);
 	npid = task_pid_nr(cur);
 	get_fs_root(cur->fs, &root);
 	get_fs_pwd(cur->fs, &pwd);
@@ -44,12 +34,5 @@ static int __init hello_init(void) {
 	spin_unlock(&pwd.dentry->d_lock);
 	printk("\n");
 
-	return 0;
+	return 0;	
 }
-
-static void __exit hello_cleanup(void) {
-	printk(KERN_INFO "Cleaning up module.\n");
-}
-
-module_init(hello_init);
-module_exit(hello_cleanup);
