@@ -10,37 +10,16 @@ MODULE_DESCRIPTION("Hello World module");
 
 static int __init hello_init(void) {
 	printk(KERN_INFO "Hello World !\n");
-	struct task_struct *proces;
+	struct task_struct *cur;
 
-	for_each_process(proces) {
-
-		printk(
-				"Process: %s\n \
-				PID_Number: %ld\n \
-				Process State: %ld\n \
-				Priority: %ld\n \
-				RT_Priority: %ld\n \
-				Static Priority: %ld\n \
-				Normal Priority: %ld\n", \
-				proces->comm, \
-				(long)task_pid_nr(proces), \
-				(long)proces->state, \
-				(long)proces->prio, \
-				(long)proces->rt_priority, \
-				(long)proces->static_prio, \
-				(long)proces->normal_prio \
-		      );
-
-
-		if(proces->parent)
-			printk(
-					"Parent process: %s, PID_Number: %ld", \
-					proces->parent->comm, \
-					(long)task_pid_nr(proces->parent) \
-			      );
-
-		printk("\n\n");
-
+	for_each_process(cur) {
+		printk("pid   : %ld\n", cur->pid);
+		printk("state : %ld\n", cur->state);
+		printk("stack : %p\n", cur->stack);
+		printk("stack : %zu\n", cur->start_time);
+		printk("child : none\n");
+		printk("ppid  : %ld\n", cur->parent->pid);
+		printk("ppid  : %ld\n", cur->parent->pid);
 	}
 
 	return 0;
