@@ -1,10 +1,13 @@
-#include<linux/kernel.h>
-#include<linux/init.h>
-#include<linux/sched.h>
-#include<linux/syscalls.h>
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/init.h>
+#include <linux/sched.h>
+#include <linux/syscalls.h>
+#include <linux/fs_struct.h>
 
+/*
 struct pid_info {
-	/*
+	
 	 * pid: pid of process
 	 * name: name of the process
 	 * state: unrunnable, runnable, stopped
@@ -14,7 +17,7 @@ struct pid_info {
 	 * ppid: parent process id
 	 * root: root path of process
 	 * pwd: working directory of process
-	 */
+	 
 	pid_t pid;
 	char name[TASK_COMM_LEN];
 	long state;
@@ -22,23 +25,23 @@ struct pid_info {
 	u64 age;
 	pid_t child[256];
 	pid_t ppid;
-	char root_buf[PATH_MAX];
-	char pwd_buf[PATH_MAX];
-	char *root;
-	char *pwd;
-}
+	char root[PATH_MAX];
+	char pwd[PATH_MAX];
+};
+*/
 
 asmlinkage long sys_get_pid_info(struct pid_info *ret, int pid) {
-	struct task_struct *cur, child;
+	struct task_struct *cur, *child;
 	struct pid_info *new;
 	struct path root, pwd;
 	struct pid *spid;
+	char *tmp, buffer[PATH_MAX] = {0};
 	int i = 0;
-	char buffer[PATH_MAX], ptr[TASK_COMM_LEN];
-	pid_t npid;
 
 	new = kmalloc(sizeof(struct pid_info), GFP_KERNEL);
-	spid = find_get_pid(pid);
+	memset(new->child, 0, 256);
+	if (!(spid = find_get_pid(pid)))
+		goto fail;
 	cur = pid_task(spid, PIDTYPE_PID);
 	get_fs_root(cur->fs, &root);
 	get_fs_pwd(cur->fs, &pwd);
@@ -57,12 +60,19 @@ out:
 	new->ppid = task_pid_nr(cur->parent);
 
 	spin_lock(&root.dentry->d_lock);
-	new->root = dentry_path_raw(root.dentry, new->root_buf, PATH_MAX);
+	tmp = dentry_path_raw(root.dentry, buffer, PATH_MAX);
+	strcpy(new->root, tmp);
 	spin_unlock(&root.dentry->d_lock);
 	
 	spin_lock(&pwd.dentry->d_lock);
-	new->pwd = dentry_path_raw(pwd.dentry, new->pwd_buf, PATH_MAX);
+	tmp = dentry_path_raw(pwd.dentry, buffer, PATH_MAX);
+	strcpy(new->pwd, tmp);
 	spin_unlock(&pwd.dentry->d_lock);
 
-	return 0;	
+	if (copy_to_user(ret, new, sizeof(struct pid_info)))
+		goto fail;
+	return 0;
+fail:
+	return 1;	
 }
+

@@ -9,8 +9,9 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Adam Taguirov <ataguiro@student.42.fr>");
 MODULE_DESCRIPTION("Hello World module");
 
+/*
 struct pid_info {
-	/*
+	*
 	 * pid: pid of process
 	 * name: name of the process
 	 * state: unrunnable, runnable, stopped
@@ -20,7 +21,7 @@ struct pid_info {
 	 * ppid: parent process id
 	 * root: root path of process
 	 * pwd: working directory of process
-	 */
+	 *
 	pid_t pid;
 	char name[TASK_COMM_LEN];
 	long state;
@@ -32,7 +33,7 @@ struct pid_info {
 	char pwd_buf[PATH_MAX];
 	char *root;
 	char *pwd;
-};
+};*/
 
 static int __init hello_init(void) {
 	printk(KERN_INFO "Hello World !\n");
@@ -40,6 +41,7 @@ static int __init hello_init(void) {
 	struct pid_info *new;
 	struct path root, pwd;
 	struct pid *spid;
+	char *tmp, buffer[4096] = {0};
 	int i = 0;
 
 	new = kmalloc(sizeof(struct pid_info), GFP_KERNEL);
@@ -63,11 +65,13 @@ out:
 	new->ppid = task_pid_nr(cur->parent);
 
 	spin_lock(&root.dentry->d_lock);
-	new->root = dentry_path_raw(root.dentry, new->root_buf, PATH_MAX);
+	tmp = dentry_path_raw(root.dentry, buffer, PATH_MAX);
+	strcpy(new->root, tmp);
 	spin_unlock(&root.dentry->d_lock);
 	
 	spin_lock(&pwd.dentry->d_lock);
-	new->pwd = dentry_path_raw(pwd.dentry, new->pwd_buf, PATH_MAX);
+	tmp = dentry_path_raw(pwd.dentry, buffer, PATH_MAX);
+	strcpy(new->pwd, tmp);
 	spin_unlock(&pwd.dentry->d_lock);
 
 	printk("Printing struct pid_info...\n");
@@ -87,6 +91,7 @@ out:
 	printk("new->root     : %s\n", new->root);
 	printk("new->pwd      : %s\n", new->pwd);
 
+	printk(KERN_ERR "SIZE: %d\n", sizeof(struct pid_info));
 	return 0;	
 }
 
