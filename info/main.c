@@ -37,10 +37,12 @@ static int __init hello_init(void) {
 	}
 	printk("ppid  : %d\n", cur->parent->pid);
 	spin_lock(&root.dentry->d_lock);
-	printk("root  : %s\n", dentry_path_raw(root.dentry, buffer, PATH_MAX));
+	buffer = dentry_path_raw(root.dentry, buffer, PATH_MAX);
+	printk("ROOT  : %s\n", buffer);
 	spin_unlock(&root.dentry->d_lock);
 	spin_lock(&pwd.dentry->d_lock);
-	printk("pwd   : %s\n", dentry_path_raw(pwd.dentry, buffer, PATH_MAX));
+	buffer = dentry_path_raw(pwd.dentry, buffer, PATH_MAX);
+	printk("PWD   : %s\n", buffer);
 	spin_unlock(&pwd.dentry->d_lock);
 	printk("\n");
 
