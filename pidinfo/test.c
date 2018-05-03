@@ -48,6 +48,10 @@ int main(int ac, char **av)
 		pid = atoi(av[1]);
 	int ret = syscall(333, &new, pid);
 
+	if (ret) {
+		printf("syscall failed for one or other reason...\n");
+		return 1;
+	}
 	printf("Printing struct pid_info...\n");
         printf("new->pid      : %d\n", new.pid);
         printf("new->name     : %s\n", new.name);
