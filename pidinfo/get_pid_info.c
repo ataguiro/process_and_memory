@@ -73,6 +73,6 @@ out:
 		goto fail;
 	return 0;
 fail:
-	return 1;	
+	return ESRCH;	
 }
 
