@@ -35,6 +35,7 @@ asmlinkage long sys_get_pid_info(struct pid_info *ret, int pid) {
 	struct pid_info *new;
 	struct path root, pwd;
 	struct pid *spid;
+	struct timespec ts;
 	char *tmp, buffer[PATH_MAX] = {0};
 	int i = 0;
 
@@ -50,7 +51,8 @@ asmlinkage long sys_get_pid_info(struct pid_info *ret, int pid) {
 	new->pid = task_pid_nr(cur);	
 	new->state = cur->state;
 	new->stack = cur->stack;
-	new->age = cur->start_time;
+	getnstimeofday(&ts);
+	new->age = ts.tv_sec - cur->start_time;
 	list_for_each_entry(child, &cur->children, sibling) {
 		if (i > 255)
 			goto out;
