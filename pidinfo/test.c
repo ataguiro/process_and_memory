@@ -9,16 +9,12 @@
 
 #include "struct_333.h"
 
-#define TASK_COMM_LEN 16
-#define PATH_MAX 4096
-
-typedef uint64_t u64;
-
 int main(int ac, char **av)
 {
 	pid_t pid;
 	struct pid_info new;
 	memset(&new, 0, sizeof(new));
+	new.age = 0;
 	if (ac == 1)
 		pid = getpid();
 	else

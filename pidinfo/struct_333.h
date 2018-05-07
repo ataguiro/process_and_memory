@@ -1,6 +1,11 @@
 #ifndef STRUCT_333
 # define STRUCT_333
 
+#define TASK_COMM_LEN 16
+#define PATH_MAX 4096
+
+typedef uint64_t u64;
+
 struct pid_info {
         /*
          * pid: pid of process
@@ -17,7 +22,7 @@ struct pid_info {
         char name[TASK_COMM_LEN];
         long state;
         void *stack;
-        u64 age;
+        int age;
         pid_t child[256];
         pid_t ppid;
         char root[PATH_MAX];

@@ -31,6 +31,7 @@ struct pid_info {
 */
 
 #include "struct_333.h"
+#define BILLION  1000000000L
 
 asmlinkage long sys_get_pid_info(struct pid_info *ret, int pid) {
 	struct task_struct *cur, *child;
@@ -58,7 +59,7 @@ asmlinkage long sys_get_pid_info(struct pid_info *ret, int pid) {
 	new->state = cur->state;
 	new->stack = cur->stack;
 	getnstimeofday(&ts);
-	new->age = ts.tv_sec - cur->start_time;
+	new->age = ((ts.tv_sec * BILLION + ts.tv_nsec) - cur->start_time) / BILLION;
 	list_for_each_entry(child, &cur->children, sibling) {
 		if (i > 255)
 			goto out;
