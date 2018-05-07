@@ -7,6 +7,8 @@
 #include <linux/module.h>
 #include <linux/sched.h>
 
+#include "struct_333.h"
+
 #define TASK_COMM_LEN 16
 #define PATH_MAX 4096
 

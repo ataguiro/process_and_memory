@@ -40,15 +40,19 @@ asmlinkage long sys_get_pid_info(struct pid_info *ret, int pid) {
 	int i = 0;
 
 	new = kmalloc(sizeof(struct pid_info), GFP_KERNEL);
+	if (!new)
+		return -ENOMEM;
 	memset(new->child, 0, 256);
 	if (!(spid = find_get_pid(pid)))
 		goto fail;
 	cur = pid_task(spid, PIDTYPE_PID);
+	if (!cur)
+		goto fail;
 	get_fs_root(cur->fs, &root);
 	get_fs_pwd(cur->fs, &pwd);
 	
 	get_task_comm(new->name, cur);
-	new->pid = task_pid_nr(cur);	
+	new->pid = task_pid_nr(cur);
 	new->state = cur->state;
 	new->stack = cur->stack;
 	getnstimeofday(&ts);
@@ -75,6 +79,6 @@ out:
 		goto fail;
 	return 0;
 fail:
-	return ESRCH;	
+	return -ESRCH;	
 }
 
