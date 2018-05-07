@@ -30,6 +30,8 @@ struct pid_info {
 };
 */
 
+#include "struct_333.h"
+
 asmlinkage long sys_get_pid_info(struct pid_info *ret, int pid) {
 	struct task_struct *cur, *child;
 	struct pid_info *new;
@@ -39,15 +41,15 @@ asmlinkage long sys_get_pid_info(struct pid_info *ret, int pid) {
 	char *tmp, buffer[PATH_MAX] = {0};
 	int i = 0;
 
-	new = kmalloc(sizeof(struct pid_info), GFP_KERNEL);
-	if (!new)
-		return -ENOMEM;
-	memset(new->child, 0, 256);
 	if (!(spid = find_get_pid(pid)))
 		goto fail;
 	cur = pid_task(spid, PIDTYPE_PID);
 	if (!cur)
 		goto fail;
+	new = kmalloc(sizeof(struct pid_info), GFP_KERNEL);
+	if (!new)
+		return -ENOMEM;
+	memset(new->child, 0, 256);
 	get_fs_root(cur->fs, &root);
 	get_fs_pwd(cur->fs, &pwd);
 	
@@ -75,8 +77,11 @@ out:
 	strcpy(new->pwd, tmp);
 	spin_unlock(&pwd.dentry->d_lock);
 
-	if (copy_to_user(ret, new, sizeof(struct pid_info)))
+	if (copy_to_user(ret, new, sizeof(struct pid_info))) {
+		kfree(new);
 		goto fail;
+	}
+	kfree(new);
 	return 0;
 fail:
 	return -ESRCH;	
