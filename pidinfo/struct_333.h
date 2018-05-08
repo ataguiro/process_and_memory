@@ -12,7 +12,7 @@ struct pid_info {
          * name: name of the process
          * state: unrunnable, runnable, stopped
          * stack: pointer to the beginning of process's stack
-         * age: living time in nanoseconds
+         * age: birth time in nanoseconds
          * child: array of all child processes pid
          * ppid: parent process id
          * root: root path of process
@@ -22,7 +22,7 @@ struct pid_info {
         char name[TASK_COMM_LEN];
         long state;
         void *stack;
-        int age;
+        u64 age;
         pid_t child[256];
         pid_t ppid;
         char root[PATH_MAX];

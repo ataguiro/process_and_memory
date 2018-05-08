@@ -5,42 +5,18 @@
 #include <linux/syscalls.h>
 #include <linux/fs_struct.h>
 
-/*
-struct pid_info {
-	
-	 * pid: pid of process
-	 * name: name of the process
-	 * state: unrunnable, runnable, stopped
-	 * stack: pointer to the beginning of process's stack
-	 * age: living time in nanoseconds
-	 * child: array of all child processes pid
-	 * ppid: parent process id
-	 * root: root path of process
-	 * pwd: working directory of process
-	 
-	pid_t pid;
-	char name[TASK_COMM_LEN];
-	long state;
-	void *stack;
-	u64 age;
-	pid_t child[256];
-	pid_t ppid;
-	char root[PATH_MAX];
-	char pwd[PATH_MAX];
-};
-*/
-
 #include "struct_333.h"
-#define BILLION  1000000000L
 
 asmlinkage long sys_get_pid_info(struct pid_info *ret, int pid) {
 	struct task_struct *cur, *child;
 	struct pid_info *new;
 	struct path root, pwd;
 	struct pid *spid;
-	struct timespec ts;
+	//struct timespec ts;
+	//struct sysinfo sys_info;
 	char *tmp, buffer[PATH_MAX] = {0};
 	int i = 0;
+	//u64 tmp_time;
 
 	if (!(spid = find_get_pid(pid)))
 		goto fail;
@@ -50,7 +26,7 @@ asmlinkage long sys_get_pid_info(struct pid_info *ret, int pid) {
 	new = kmalloc(sizeof(struct pid_info), GFP_KERNEL);
 	if (!new)
 		return -ENOMEM;
-	memset(new->child, 0, 256);
+	memset(new->child, 0, 256 * sizeof(pid_t));
 	get_fs_root(cur->fs, &root);
 	get_fs_pwd(cur->fs, &pwd);
 	
@@ -58,8 +34,11 @@ asmlinkage long sys_get_pid_info(struct pid_info *ret, int pid) {
 	new->pid = task_pid_nr(cur);
 	new->state = cur->state;
 	new->stack = cur->stack;
-	getnstimeofday(&ts);
-	new->age = ((ts.tv_sec * BILLION + ts.tv_nsec) - cur->start_time) / BILLION;
+	//getnstimeofday(&ts);
+	//tmp_time = local_clock();
+	//sys_sysinfo(&sys_info);
+	//tmp_time = sys_info.uptime * 1000000000L;
+	new->age = cur->start_time;
 	list_for_each_entry(child, &cur->children, sibling) {
 		if (i > 255)
 			goto out;

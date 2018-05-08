@@ -3,11 +3,29 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <inttypes.h>
+#include <stdlib.h>
 
 #include <linux/module.h>
 #include <linux/sched.h>
 
 #include "struct_333.h"
+
+void print_parents(pid_t pid)
+{
+	struct pid_info new;
+	static index = 0;
+
+        printf("\tParent %d : %d\n", index++, pid);
+	
+	if (!pid)
+		return ;
+	int ret = syscall(333, &new, pid);
+	if (ret) {
+                printf("syscall failed for one or other reason...\n");
+                exit(EXIT_FAILURE);
+        }
+	print_parents(new.ppid);
+}
 
 int main(int ac, char **av)
 {
@@ -23,23 +41,23 @@ int main(int ac, char **av)
 
 	if (ret) {
 		printf("syscall failed for one or other reason...\n");
-		return 1;
+		return EXIT_FAILURE;
 	}
 	printf("Printing struct pid_info...\n");
-        printf("new->pid      : %d\n", new.pid);
-        printf("new->name     : %s\n", new.name);
-        printf("new->state    : %ld\n", new.state);
-        printf("new->stack    : %llx\n", new.stack);
-        printf("new->age      : %lld\n", new.age);
+        printf("PID       : %d\n", new.pid);
+        printf("Name      : %s\n", new.name);
+        printf("State     : %ld\n", new.state);
+        printf("Stack     : %llx\n", new.stack);
+        printf("Birthtime : %lld\n", new.age);
         int j;
         for (j = 0; j < 255; j++)
         {
                 if (!new.child[j])
                         break ;
-                printf("\tnew->child %d : %d\n", j, new.child[j]);
+                printf("\tChild %d  : %d\n", j, new.child[j]);
         }
-        printf("new->ppid     : %d\n", new.ppid);
-        printf("new->root     : %s\n", new.root);
-        printf("new->pwd      : %s\n", new.pwd);
-	return 0;
+	print_parents(new.ppid);
+        printf("Root      : %s\n", new.root);
+        printf("PWD       : %s\n", new.pwd);
+	return EXIT_SUCCESS;
 }
