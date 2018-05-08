@@ -12,11 +12,12 @@ asmlinkage long sys_get_pid_info(struct pid_info *ret, int pid) {
 	struct pid_info *new;
 	struct path root, pwd;
 	struct pid *spid;
-	//struct timespec ts;
-	//struct sysinfo sys_info;
-	char *tmp, buffer[PATH_MAX] = {0};
+	/* struct timespec ts;
+	 * struct sysinfo sys_info;
+	 */
+	 char *tmp, buffer[PATH_MAX] = {0};
 	int i = 0;
-	//u64 tmp_time;
+	/* u64 tmp_time; */
 
 	if (!(spid = find_get_pid(pid)))
 		goto fail;
@@ -34,10 +35,11 @@ asmlinkage long sys_get_pid_info(struct pid_info *ret, int pid) {
 	new->pid = task_pid_nr(cur);
 	new->state = cur->state;
 	new->stack = cur->stack;
-	//getnstimeofday(&ts);
-	//tmp_time = local_clock();
-	//sys_sysinfo(&sys_info);
-	//tmp_time = sys_info.uptime * 1000000000L;
+	/* getnstimeofday(&ts);
+	 * tmp_time = local_clock();
+	 * sys_sysinfo(&sys_info);
+	 * tmp_time = sys_info.uptime * 1000000000L;
+	 */
 	new->age = cur->start_time;
 	list_for_each_entry(child, &cur->children, sibling) {
 		if (i > 255)
